@@ -1,0 +1,17 @@
+# Core dependencies for Trickle Relay Service
+aiohttp>=3.8.0
+aiortc>=1.4.0
+av>=10.0.0
+
+# Optional dependencies for enhanced functionality
+aiohttp-cors>=0.7.0
+
+# Development dependencies (optional)
+black>=22.0.0
+flake8>=5.0.0
+mypy>=0.991
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+
+# For better logging and debugging
+colorlog>=6.7.0 

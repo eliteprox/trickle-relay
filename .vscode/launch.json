@@ -1,0 +1,119 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Trickle Relay Service",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/trickle_relay_service.py",
+            "args": [
+                "--host", "0.0.0.0",
+                "--port", "8890",
+                "--log-level", "INFO"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {},
+            "envFile": "${workspaceFolder}/.env",
+            "justMyCode": true,
+            "stopOnEntry": false,
+            "autoReload": {
+                "enable": true
+            }
+        },
+        {
+            "name": "Trickle Relay Service (Debug)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/trickle_relay_service.py",
+            "args": [
+                "--host", "127.0.0.1",
+                "--port", "8890",
+                "--log-level", "DEBUG"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {},
+            "envFile": "${workspaceFolder}/.env",
+            "justMyCode": false,
+            "stopOnEntry": false,
+            "autoReload": {
+                "enable": true
+            }
+        },
+        {
+            "name": "Trickle Relay Service (Custom Port)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/trickle_relay_service.py",
+            "args": [
+                "--host", "0.0.0.0",
+                "--port", "8891",
+                "--log-level", "INFO"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {},
+            "envFile": "${workspaceFolder}/.env",
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+        {
+            "name": "Example Usage Script",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/example_usage.py",
+            "args": [],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {},
+            "envFile": "${workspaceFolder}/.env",
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+        {
+            "name": "Test Trickle Components",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "-v",
+                "-s",
+                "tests/"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {},
+            "envFile": "${workspaceFolder}/.env",
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+        {
+            "name": "Attach to Trickle Relay",
+            "type": "debugpy",
+            "request": "attach",
+            "connect": {
+                "host": "localhost",
+                "port": 5678
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}",
+                    "remoteRoot": "."
+                }
+            ],
+            "justMyCode": false
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Launch Service + Examples",
+            "configurations": [
+                "Trickle Relay Service",
+                "Example Usage Script"
+            ],
+            "stopAll": true,
+            "preLaunchTask": "wait-for-service"
+        }
+    ]
+} 

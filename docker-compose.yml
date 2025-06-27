@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  trickle-relay:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: trickle-relay-service
+    ports:
+      - "8890:8890"
+    environment:
+      # Service configuration
+      - RELAY_HOST=0.0.0.0
+      - RELAY_PORT=8890
+      - LOG_LEVEL=INFO
+
+      # Default ComfyStream URL (adjust as needed)
+      - DEFAULT_COMFYSTREAM_URL=http://host.docker.internal:8889
+
+      # Performance settings
+      - FRAME_BATCH_SIZE=24
+      - TARGET_FPS=24.0
+      - SEGMENT_DURATION=3.0
+
+      # Queue configuration
+      - MAX_DECODED_FRAMES=100
+      - MAX_PROCESSED_FRAMES=100
+      - MAX_OUTPUT_SEGMENTS=50
+
+    volumes:
+      # Mount logs directory for persistent logging
+      - ./logs:/app/logs
+
+      # Mount data directory for any persistent data
+      - ./data:/app/data
+
+      # Optional: Mount .env file for configuration
+      - ./.env:/app/.env:ro
+
+    networks:
+      - trickle-network
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8890/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+  # Example ComfyStream service (commented out - replace with your actual ComfyStream setup)
+  # comfystream:
+  #   image: comfystream:latest
+  #   container_name: comfystream-service
+  #   ports:
+  #     - "8889:8889"
+  #   networks:
+  #     - trickle-network
+  #   command: ["python", "app.py", "--mode=trickle", "--port", "8889"]
+
+networks:
+  trickle-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  trickle-logs:
+    driver: local
+  trickle-data:
+    driver: local
