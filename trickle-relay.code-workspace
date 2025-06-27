@@ -1,0 +1,24 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../comfystream"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"*.py": "python",
+			"requirements*.txt": "pip-requirements",
+			"Dockerfile*": "dockerfile"
+		},
+		"terminal.integrated.defaultProfile.linux": "bash",
+		"terminal.integrated.defaultProfile.osx": "zsh",
+		"terminal.integrated.defaultProfile.windows": "PowerShell",
+		"git.confirmSync": false,
+		"debug.internalConsoleOptions": "neverOpen",
+		"debug.console.fontSize": 14,
+		"debug.console.lineHeight": 19
+	}
+}
