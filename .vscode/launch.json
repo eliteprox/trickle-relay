@@ -5,11 +5,14 @@
             "name": "Trickle Relay Service",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/trickle_relay_service.py",
+            "program": "${workspaceFolder}/trickle_relay_service_optimized.py",
             "args": [
-                "--host", "0.0.0.0",
-                "--port", "8890",
-                "--log-level", "INFO"
+                "--host",
+                "0.0.0.0",
+                "--port",
+                "8890",
+                "--log-level",
+                "INFO"
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
@@ -25,11 +28,14 @@
             "name": "Trickle Relay Service (Debug)",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/trickle_relay_service.py",
+            "program": "${workspaceFolder}/trickle_relay_service_optimized.py",
             "args": [
-                "--host", "127.0.0.1",
-                "--port", "8890",
-                "--log-level", "DEBUG"
+                "--host",
+                "127.0.0.1",
+                "--port",
+                "8890",
+                "--log-level",
+                "DEBUG"
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
@@ -47,9 +53,12 @@
             "request": "launch",
             "program": "${workspaceFolder}/trickle_relay_service.py",
             "args": [
-                "--host", "0.0.0.0",
-                "--port", "8891",
-                "--log-level", "INFO"
+                "--host",
+                "0.0.0.0",
+                "--port",
+                "8891",
+                "--log-level",
+                "INFO"
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
@@ -116,4 +125,4 @@
             "preLaunchTask": "wait-for-service"
         }
     ]
-} 
+}
