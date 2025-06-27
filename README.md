@@ -6,16 +6,23 @@ A standalone microservice that acts as a bridge between trickle HTTP segments an
 
 ### Trickle Relay
 
+### Trickle Relay
+
 ```
 Trickle Input Stream → Decode Frames → WebRTC to ComfyStream → Process Frames → Encode Segments → Trickle Output Stream
 ```
 
 The Trickle Relay follows this flow:
+The Trickle Relay follows this flow:
 
+1. **Trickle Subscriber**: Receives trickle HTTP segments from input stream
+2. **Frame Decoder**: Decodes MPEG-TS segments to video frames
 1. **Trickle Subscriber**: Receives trickle HTTP segments from input stream
 2. **Frame Decoder**: Decodes MPEG-TS segments to video frames
 3. **WebRTC Client**: Establishes WebRTC connection to ComfyStream and sends frames
 4. **Frame Processor**: Receives processed frames from ComfyStream via WebRTC
+5. **Segment Encoder**: Encodes processed frames back to MPEG-TS segments
+6. **Trickle Publisher**: Publishes processed segments via trickle HTTP protocol
 5. **Segment Encoder**: Encodes processed frames back to MPEG-TS segments
 6. **Trickle Publisher**: Publishes processed segments via trickle HTTP protocol
 
@@ -60,99 +67,11 @@ pip install aiohttp aiortc av asyncio aiohttp-cors
 
 - `aiohttp-cors`: For CORS support (recommended)
 
-
-## Docker Usage
-
-### Quick Start with Docker
-
-1. **Build the image:**
-```bash
-./docker-build.sh build
-```
-
-2. **Run the container:**
-```bash
-./docker-build.sh run
-```
-
-3. **Check service health:**
-```bash
-./docker-build.sh health
-```
-
-### Docker Commands
-
-The `docker-build.sh` script provides convenient commands:
-
-```bash
-# Build Docker image
-./docker-build.sh build
-
-# Run container
-./docker-build.sh run
-
-# Stop container
-./docker-build.sh stop
-
-# Restart container
-./docker-build.sh restart
-
-# View logs
-./docker-build.sh logs
-./docker-build.sh logs -f  # Follow logs
-
-# Open shell in container
-./docker-build.sh shell
-
-# Check health
-./docker-build.sh health
-
-# Clean up (remove container and image)
-./docker-build.sh clean
-```
-
-### Docker Compose
-
-For production deployment, use docker-compose:
-
-```bash
-# Start services
-docker-compose up -d
-
-# View logs
-docker-compose logs -f
-
-# Stop services
-docker-compose down
-
-# Or use the helper script
-./docker-build.sh compose-up
-./docker-build.sh compose-down
-```
-
-### Environment Variables
-
-Configure the service using environment variables:
-
-```bash
-# In .env file or docker-compose.yml
-RELAY_HOST=0.0.0.0
-RELAY_PORT=8890
-LOG_LEVEL=INFO
-DEFAULT_COMFYSTREAM_URL=http://localhost:8889
-FRAME_BATCH_SIZE=24
-TARGET_FPS=24.0
-```
-
-### Volume Mounts
-
-The Docker setup includes volume mounts for:
-- `/app/logs` - Persistent log storage
-- `/app/data` - Application data
-- `.env` - Configuration file (read-only)
-
 ## Usage
 
+### Trickle Relay Service
+
+#### Starting the Service (Python)
 ### Trickle Relay Service
 
 #### Starting the Service (Python)
@@ -162,6 +81,7 @@ python trickle_relay_service.py --host 0.0.0.0 --port 8890 --log-level INFO
 ```
 
 #### Starting the Service (Docker)
+#### Starting the Service (Docker)
 
 ```bash
 ./docker-build.sh run
@@ -170,13 +90,16 @@ docker-compose up -d
 ```
 
 #### Command Line Options
+#### Command Line Options
 
 - `--host`: Bind host (default: 0.0.0.0)
 - `--port`: Bind port (default: 8890)
 - `--log-level`: Log level (DEBUG, INFO, WARNING, ERROR)
 
 #### API Endpoints
+#### API Endpoints
 
+##### Start Relay Session
 ##### Start Relay Session
 
 Start a new trickle-to-WebRTC relay session:
@@ -290,10 +213,12 @@ Response:
 {
   "status": "healthy"
   }
+  }
 ```
 
 ## Architecture Details
 
+### Trickle Relay Components
 ### Trickle Relay Components
 
 - **`TrickleSubscriber`**: Handles trickle HTTP protocol for input streams
@@ -312,6 +237,8 @@ Input Queue (100 frames) → WebRTC → Output Queue (100 frames) → Segment Qu
 ### Error Handling
 
 - **Connection Failures**: Automatic reconnection attempts
+- **Frame Processing**: Graceful degradation with error logging
+- **Queue Management**: Backpressure handling and monitoring
 - **Frame Processing**: Graceful degradation with error logging
 - **Queue Management**: Backpressure handling and monitoring
 - **WebRTC State**: Connection monitoring and recovery
@@ -366,6 +293,7 @@ import asyncio
 import aiohttp
 
 async def test_trickle_relay():
+async def test_trickle_relay():
     async with aiohttp.ClientSession() as session:
         # Start session
         async with session.post('http://localhost:8890/session/start', json={
@@ -381,6 +309,7 @@ async def test_trickle_relay():
             status = await resp.json()
             print(status)
 
+asyncio.run(test_trickle_relay())
 asyncio.run(test_trickle_relay())
 ```
 
