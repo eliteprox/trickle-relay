@@ -4,18 +4,20 @@ A standalone microservice that acts as a bridge between trickle HTTP segments an
 
 ## Architecture
 
+### Trickle Relay
+
 ```
 Trickle Input Stream → Decode Frames → WebRTC to ComfyStream → Process Frames → Encode Segments → Trickle Output Stream
 ```
 
-The microservice follows the flow described in the diagram:
+The Trickle Relay follows this flow:
 
-1. **Trickle Subscriber**: Ingests trickle HTTP segments from input streams
-2. **Frame Decoder**: Decodes trickle segments into individual video frames
+1. **Trickle Subscriber**: Receives trickle HTTP segments from input stream
+2. **Frame Decoder**: Decodes MPEG-TS segments to video frames
 3. **WebRTC Client**: Establishes WebRTC connection to ComfyStream and sends frames
 4. **Frame Processor**: Receives processed frames from ComfyStream via WebRTC
-5. **Segment Encoder**: Encodes processed frames back into trickle segments
-6. **Trickle Publisher**: Publishes output trickle stream
+5. **Segment Encoder**: Encodes processed frames back to MPEG-TS segments
+6. **Trickle Publisher**: Publishes processed segments via trickle HTTP protocol
 
 ## Features
 
@@ -57,6 +59,7 @@ pip install aiohttp aiortc av asyncio aiohttp-cors
 #### Optional Dependencies
 
 - `aiohttp-cors`: For CORS support (recommended)
+
 
 ## Docker Usage
 
@@ -150,13 +153,15 @@ The Docker setup includes volume mounts for:
 
 ## Usage
 
-### Starting the Service (Python)
+### Trickle Relay Service
+
+#### Starting the Service (Python)
 
 ```bash
 python trickle_relay_service.py --host 0.0.0.0 --port 8890 --log-level INFO
 ```
 
-### Starting the Service (Docker)
+#### Starting the Service (Docker)
 
 ```bash
 ./docker-build.sh run
@@ -164,15 +169,15 @@ python trickle_relay_service.py --host 0.0.0.0 --port 8890 --log-level INFO
 docker-compose up -d
 ```
 
-### Command Line Options
+#### Command Line Options
 
 - `--host`: Bind host (default: 0.0.0.0)
 - `--port`: Bind port (default: 8890)
 - `--log-level`: Log level (DEBUG, INFO, WARNING, ERROR)
 
-### API Endpoints
+#### API Endpoints
 
-#### Start Relay Session
+##### Start Relay Session
 
 Start a new trickle-to-WebRTC relay session:
 
@@ -284,146 +289,12 @@ Response:
 ```json
 {
   "status": "healthy"
-}
+  }
 ```
-
-## Configuration
-
-### Session Configuration
-
-- `input_stream_url`: URL of the input trickle stream
-- `comfystream_url`: URL of the ComfyStream service
-- `prompts`: Array of prompt objects for ComfyUI processing
-- `width`: Target frame width (default: 512)
-- `height`: Target frame height (default: 512)
-- `output_stream_url`: URL for output trickle stream (optional)
-
-### Prompt Format
-
-Prompts should follow ComfyUI workflow format. Simple text prompts are automatically converted:
-
-```json
-{
-  "prompts": [
-    {
-      "text": "your prompt here"
-    }
-  ]
-}
-```
-
-For advanced workflows, use full ComfyUI format:
-
-```json
-{
-  "prompts": [
-    {
-      "5": {
-        "inputs": {
-          "text": "beautiful landscape",
-          "clip": ["23", 0]
-        },
-        "class_type": "CLIPTextEncode"
-      }
-    }
-  ]
-}
-```
-
-## Integration Example
-
-### With Trickle Stream (Python)
-
-1. Start ComfyStream service:
-```bash
-python app.py --mode=trickle --port 8889
-```
-
-2. Start Trickle Relay Service:
-```bash
-python trickle_relay_service.py --port 8890
-```
-
-3. Start relay session:
-```bash
-curl -X POST http://localhost:8890/session/start \
-  -H "Content-Type: application/json" \
-  -d '{
-    "input_stream_url": "http://input-server/stream",
-    "comfystream_url": "http://localhost:8889",
-    "prompts": [{"text": "enhance this image"}],
-    "width": 512,
-    "height": 512
-  }'
-```
-
-### With Docker
-
-1. Start Trickle Relay Service:
-```bash
-# Using docker-build script
-./docker-build.sh build
-./docker-build.sh run
-
-# Or using docker-compose
-docker-compose up -d
-```
-
-2. Start relay session:
-```bash
-curl -X POST http://localhost:8890/session/start \
-  -H "Content-Type: application/json" \
-  -d '{
-    "input_stream_url": "http://input-server/stream",
-    "comfystream_url": "http://host.docker.internal:8889",
-    "prompts": [{"text": "enhance this image"}],
-    "width": 512,
-    "height": 512
-  }'
-```
-
-### Docker Network Setup
-
-When running both services in Docker:
-
-```yaml
-# docker-compose.yml
-version: '3.8'
-services:
-  trickle-relay:
-    build: .
-    ports:
-      - "8890:8890"
-    environment:
-      - DEFAULT_COMFYSTREAM_URL=http://comfystream:8889
-    networks:
-      - ai-network
-
-  comfystream:
-    image: comfystream:latest
-    ports:
-      - "8889:8889"
-    networks:
-      - ai-network
-    command: ["python", "app.py", "--mode=trickle", "--port", "8889"]
-
-networks:
-  ai-network:
-    driver: bridge
-```
-
-### Processing Flow
-
-1. **Input**: Service subscribes to `input_stream_url` using trickle protocol
-2. **Decode**: Segments are decoded into video frames
-3. **WebRTC**: Frames sent to ComfyStream via WebRTC for AI processing
-4. **Process**: ComfyStream applies AI effects and sends processed frames back
-5. **Encode**: Processed frames are encoded into trickle segments
-6. **Output**: Segments published to output trickle stream
 
 ## Architecture Details
 
-### Components
+### Trickle Relay Components
 
 - **`TrickleSubscriber`**: Handles trickle HTTP protocol for input streams
 - **`TrickleStreamDecoder`**: Decodes MPEG-TS segments to video frames
@@ -441,8 +312,8 @@ Input Queue (100 frames) → WebRTC → Output Queue (100 frames) → Segment Qu
 ### Error Handling
 
 - **Connection Failures**: Automatic reconnection attempts
-- **Frame Processing**: Graceful degradation with blank frames
-- **Queue Overflow**: Backpressure management
+- **Frame Processing**: Graceful degradation with error logging
+- **Queue Management**: Backpressure handling and monitoring
 - **WebRTC State**: Connection monitoring and recovery
 
 ## Troubleshooting
@@ -490,13 +361,11 @@ watch -n 1 'curl -s http://localhost:8890/session/SESSION_ID/status | jq .sessio
 
 ### Testing
 
-Test with a simple relay session:
-
 ```python
 import asyncio
 import aiohttp
 
-async def test_relay():
+async def test_trickle_relay():
     async with aiohttp.ClientSession() as session:
         # Start session
         async with session.post('http://localhost:8890/session/start', json={
@@ -512,7 +381,7 @@ async def test_relay():
             status = await resp.json()
             print(status)
 
-asyncio.run(test_relay())
+asyncio.run(test_trickle_relay())
 ```
 
 ## License

@@ -5,7 +5,7 @@
             "name": "Trickle Relay Service",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/trickle_relay_service_optimized.py",
+            "program": "${workspaceFolder}/trickle_relay_service.py",
             "args": [
                 "--host",
                 "0.0.0.0",
@@ -28,7 +28,7 @@
             "name": "Trickle Relay Service (Debug)",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/trickle_relay_service_optimized.py",
+            "program": "${workspaceFolder}/trickle_relay_service.py",
             "args": [
                 "--host",
                 "127.0.0.1",
